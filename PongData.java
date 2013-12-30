@@ -1,5 +1,6 @@
 
 public class PongData {
+	//Frame/game data
 	private final static int defaultWidth = 600;
 	private final static int defaultHeight = 600;
 	private static int frameWidth = defaultWidth;
@@ -8,16 +9,33 @@ public class PongData {
 	private static final int paddleHeight = frameHeight/10;
 	private static final int paddleWidth = frameWidth/20;
 	private static final int paddleYLocationInitial = frameHeight/2 - paddleHeight/2;
-	private static final int playerPaddleXLocation = paddleOffset;
-	private static int playerPaddleYLocation;
-	private static final int aiPaddleXLocation = frameWidth - paddleWidth - paddleOffset - 5;
-	private static int aiPaddleYLocation;
 	private static final int paddleChange = 5;
+	public static boolean gameWon;
+	
+	public static boolean isGameWon() {
+		return gameWon;
+	}
+
+	public static void setGameWon(boolean gameWon) {
+		PongData.gameWon = gameWon;
+	}
+
+	//Ball data
 	private static int ballYLocation;
 	private static int ballXLocation;
 	private static final int ballWidth = 5;
 	private static int ballXSpeed;
 	private static int ballYSpeed;
+	
+	//Player data
+	private static final int playerPaddleXLocation = paddleOffset;
+	private static int playerPaddleYLocation;
+	private static int playerScore;
+	
+	//Ai data
+	private static final int aiPaddleXLocation = frameWidth - paddleWidth - paddleOffset - 5;
+	private static int aiPaddleYLocation;
+	private static int aiScore;
 	
 	public static int getBallXSpeed() {
 		return ballXSpeed;
@@ -42,8 +60,26 @@ public class PongData {
 		setBallYLocation(frameHeight/2);
 		setPlayerPaddleYLocation(paddleYLocationInitial);
 		setAiPaddleYLocation(paddleYLocationInitial);
+		setPlayerScore(0);
+		setAiScore(0);
 	}
 
+	public static int getPlayerScore() {
+		return playerScore;
+	}
+
+	public static void setPlayerScore(int playerScore) {
+		PongData.playerScore = playerScore;
+	}
+
+	public static int getAiScore() {
+		return aiScore;
+	}
+
+	public static void setAiScore(int aiScore) {
+		PongData.aiScore = aiScore;
+	}
+	
 	public static int getPlayerPaddleYLocation() {
 		return playerPaddleYLocation;
 	}

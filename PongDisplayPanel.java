@@ -1,37 +1,36 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
 
 import javax.swing.JPanel;
 
 
 public class PongDisplayPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+	//Player data
 	static final int playerPaddleXLocation = PongData.getPlayerPaddleXLocation();
 	static int playerPaddleYLocation;
+	
+	//Ai data
 	static final int aiPaddleXLocation = PongData.getAiPaddleXLocation();
 	static int aiPaddleYLocation;
+	
+	//Ball data
 	static int ballXLocation;
 	static int ballYLocation;
 	static int ballWidth;
-	static int paddleWidth;
-	static int paddleHeight;
-	static int frameHeight;
-	static int frameWidth;
-	static int paddleChange;
 	static int ballXSpeed;
 	static int ballYSpeed;
-	private static final int frameHeightOffset = 40;
+	
+	//Game/frame data
+	static int paddleWidth;
+	static int paddleHeight;
+	static final int frameHeight = PongData.getFrameHeight();
+	static final int frameWidth = PongData.getFrameWidth();
+	static int paddleChange;
 
 	public PongDisplayPanel(){
-		initializePanel();
 		initializePaddles();
 		initializeBall();
-	}
-	
-	private void initializePanel() {//Create the initial display panel
-		frameHeight = PongData.getFrameHeight();
-		frameWidth = PongData.getFrameWidth();
 	}
 
 	private void initializeBall() {//Create the ball
@@ -48,7 +47,6 @@ public class PongDisplayPanel extends JPanel {
 		
 		paddleWidth = PongData.getPaddleWidth();
 		paddleHeight = PongData.getPaddleHeight();
-		paddleChange = PongData.getPaddleChange();
 	}
 
 	public void paintComponent(Graphics g){
@@ -57,9 +55,24 @@ public class PongDisplayPanel extends JPanel {
 		paintUserPaddle(g);
 		paintAIPaddle(g);
 		paintBall(g);
-		g.drawString(Integer.toString(ballXSpeed), 50, 50);
+		paintStats(g);
+		paintVictory(g);
 	}
 	
+	private void paintVictory(Graphics g) {
+		if (PongData.isGameWon()){
+			g.setColor(Color.RED);
+			g.drawString("The Game is won! Player: "+PongData.getPlayerScore() + " AI: "+PongData.getAiScore(),
+					frameWidth/2 - 125, frameHeight/2-15);
+		}
+	}
+
+	private void paintStats(Graphics g) {
+		g.setColor(Color.GRAY);
+		g.drawString(Integer.toString(PongData.getPlayerScore()), 50, 50);
+		g.drawString(Integer.toString(PongData.getAiScore()), frameWidth - 50, 50);
+	}
+
 	public void paintUserPaddle(Graphics g){
 		g.setColor(Color.WHITE);
 		playerPaddleYLocation = PongData.getPlayerPaddleYLocation();
@@ -85,25 +98,5 @@ public class PongDisplayPanel extends JPanel {
 		ballYLocation = PongData.getBallYLocation();
 		ballXSpeed = PongData.getBallXSpeed();
 		ballYSpeed = PongData.getBallYSpeed();
-	}
-
-	public static void keyPressed(KeyEvent e) {
-		int key = e.getKeyCode();
-		if (key == KeyEvent.VK_KP_DOWN || key == KeyEvent.VK_DOWN){
-			if (playerPaddleYLocation < frameHeight - paddleHeight - frameHeightOffset){//Frame offset counteracts the top bar width
-				playerPaddleYLocation+=paddleChange;
-				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
-			}
-		}
-		if (key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP){
-			if (playerPaddleYLocation > 0){
-				playerPaddleYLocation-=paddleChange;
-				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
-			}
-		}
-		if (key == KeyEvent.VK_SPACE || key == KeyEvent.VK_KP_UP){
-			PongData.setBallXSpeed(10);
-			PongData.setBallYSpeed(10);
-		}
 	}
 }
