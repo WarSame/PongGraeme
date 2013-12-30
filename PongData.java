@@ -1,7 +1,7 @@
 
 public class PongData {
 	//Frame/game data
-	private final static int defaultWidth = 600;
+	private final static int defaultWidth = 750;
 	private final static int defaultHeight = 600;
 	private static int frameWidth = defaultWidth;
 	private static int frameHeight = defaultHeight;
@@ -9,16 +9,7 @@ public class PongData {
 	private static final int paddleHeight = frameHeight/10;
 	private static final int paddleWidth = frameWidth/20;
 	private static final int paddleYLocationInitial = frameHeight/2 - paddleHeight/2;
-	private static final int paddleChange = 5;
 	public static boolean gameWon;
-	
-	public static boolean isGameWon() {
-		return gameWon;
-	}
-
-	public static void setGameWon(boolean gameWon) {
-		PongData.gameWon = gameWon;
-	}
 
 	//Ball data
 	private static int ballYLocation;
@@ -31,12 +22,41 @@ public class PongData {
 	private static final int playerPaddleXLocation = paddleOffset;
 	private static int playerPaddleYLocation;
 	private static int playerScore;
+	private static int playerWins;
 	
 	//Ai data
 	private static final int aiPaddleXLocation = frameWidth - paddleWidth - paddleOffset - 5;
 	private static int aiPaddleYLocation;
 	private static int aiScore;
-	
+	private static int aiWins;
+
+	PongData(){
+		setFrameWidth(defaultWidth);
+		setFrameHeight(defaultHeight);
+		setBallXLocation(frameWidth/2);
+		setBallYLocation(frameHeight/2);
+		setPlayerPaddleYLocation(paddleYLocationInitial);
+		setAiPaddleYLocation(paddleYLocationInitial);
+		setPlayerScore(0);
+		setAiScore(0);
+	}
+
+	public static int getPlayerWins() {
+		return playerWins;
+	}
+
+	public static void setPlayerWins(int playerWins) {
+		PongData.playerWins = playerWins;
+	}
+
+	public static int getAiWins() {
+		return aiWins;
+	}
+
+	public static void setAiWins(int aiWins) {
+		PongData.aiWins = aiWins;
+	}
+
 	public static int getBallXSpeed() {
 		return ballXSpeed;
 	}
@@ -52,16 +72,13 @@ public class PongData {
 	public static void setBallYSpeed(int ballYSpeed) {
 		PongData.ballYSpeed = ballYSpeed;
 	}
+	
+	public static boolean isGameWon() {
+		return gameWon;
+	}
 
-	PongData(){
-		setFrameWidth(defaultWidth);
-		setFrameHeight(defaultHeight);
-		setBallXLocation(frameWidth/2);
-		setBallYLocation(frameHeight/2);
-		setPlayerPaddleYLocation(paddleYLocationInitial);
-		setAiPaddleYLocation(paddleYLocationInitial);
-		setPlayerScore(0);
-		setAiScore(0);
+	public static void setGameWon(boolean gameWon) {
+		PongData.gameWon = gameWon;
 	}
 
 	public static int getPlayerScore() {
@@ -131,11 +148,7 @@ public class PongData {
 	public static int getAiPaddleXLocation() {
 		return aiPaddleXLocation;
 	}
-
-	public static int getPaddleChange() {
-		return paddleChange;
-	}
-
+	
 	public static int getBallWidth() {
 		return ballWidth;
 	}

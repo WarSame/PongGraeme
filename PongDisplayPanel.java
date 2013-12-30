@@ -27,6 +27,7 @@ public class PongDisplayPanel extends JPanel {
 	static final int frameHeight = PongData.getFrameHeight();
 	static final int frameWidth = PongData.getFrameWidth();
 	static int paddleChange;
+	private static final int scoreDistFromSide = 80;
 
 	public PongDisplayPanel(){
 		initializePaddles();
@@ -52,6 +53,7 @@ public class PongDisplayPanel extends JPanel {
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
 		
+		gatherData();
 		paintUserPaddle(g);
 		paintAIPaddle(g);
 		paintBall(g);
@@ -59,6 +61,11 @@ public class PongDisplayPanel extends JPanel {
 		paintVictory(g);
 	}
 	
+	private void gatherData() {
+		aiPaddleYLocation = PongData.getAiPaddleYLocation();
+		playerPaddleYLocation = PongData.getPlayerPaddleYLocation();
+	}
+
 	private void paintVictory(Graphics g) {
 		if (PongData.isGameWon()){
 			g.setColor(Color.RED);
@@ -69,8 +76,8 @@ public class PongDisplayPanel extends JPanel {
 
 	private void paintStats(Graphics g) {
 		g.setColor(Color.GRAY);
-		g.drawString(Integer.toString(PongData.getPlayerScore()), 50, 50);
-		g.drawString(Integer.toString(PongData.getAiScore()), frameWidth - 50, 50);
+		g.drawString(Integer.toString(PongData.getPlayerScore()), scoreDistFromSide, scoreDistFromSide);
+		g.drawString(Integer.toString(PongData.getAiScore()), frameWidth - scoreDistFromSide, scoreDistFromSide);
 	}
 
 	public void paintUserPaddle(Graphics g){

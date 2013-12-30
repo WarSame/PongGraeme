@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Random;
-
 import javax.swing.JFrame;
 
 public class PongFrame extends JFrame {
@@ -15,11 +14,12 @@ public class PongFrame extends JFrame {
 	private static boolean gameWon;
 	private static boolean pointScored;
 	private static final int maxPoints = 3;
-	private static final int paddleChange = PongData.getPaddleChange();
+	private static final int paddleChange = 10;
 	private static final int frameHeight = PongData.getFrameHeight();
 	private static final int frameWidth = PongData.getFrameWidth();
 	private static final int paddleHeight = PongData.getPaddleHeight();
 	private static final int paddleWidth = PongData.getPaddleWidth();
+	private static KeyEvent e;
 	
 	//Ball data
 	private static final int updateTime = 16;//Use this to lower/raise the rate of refresh on the ball. ms.
@@ -29,12 +29,17 @@ public class PongFrame extends JFrame {
 	private static int ballYSpeed;
 	private static int ballXInitialSpeed;
 	private static int ballYInitialSpeed;
+	private static final double ballSpeedIncrease = 1.1;//Ratio of how fast the ball speeds up on collisions.
 	
 	//Player data
+	private static final int playerPaddleXLocation = PongData.getPlayerPaddleXLocation();
 	private static int playerPaddleYLocation;
 	private static int playerScore;
+	private static boolean keyDown;
+	private static boolean keyUp;
 	
 	//Ai data
+	private static final int aiPaddleXLocation = PongData.getAiPaddleXLocation();
 	private static int aiPaddleYLocation;
 	private static int aiScore;
 	
@@ -45,13 +50,20 @@ public class PongFrame extends JFrame {
 		setVisible(true);
 		runGame();
 	}
-	
+
+	protected void clearGame() {
+		new PongDisplayPanel();
+	}
+
 	private void runGame() {
 		while(!gameWon){
 			gatherData();
+			keyHandling(e);
 			edgeCollision();
 			playerPaddleCollision();
 			aiPaddleCollision();
+			playerMove();
+			aiMove();
 			updateData();
 			repaint();
 			
@@ -59,6 +71,36 @@ public class PongFrame extends JFrame {
 				Thread.sleep(updateTime);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+		}
+	}
+
+	private void playerMove() {
+		if (keyDown){
+			if (playerPaddleYLocation < frameHeight - frameHeightOffset - paddleHeight){
+				playerPaddleYLocation += paddleChange;
+				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
+			}
+		}
+		if (keyUp){
+			if (playerPaddleYLocation > 0){
+				playerPaddleYLocation -= paddleChange;
+				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
+			}
+		}
+	}
+
+	private void aiMove() {
+		if (ballYLocation > aiPaddleYLocation + paddleHeight/2){
+			if (aiPaddleYLocation < frameHeight - frameHeightOffset){
+				aiPaddleYLocation += paddleChange;
+				PongData.setAiPaddleYLocation(aiPaddleYLocation);
+			}
+		}
+		if (ballYLocation < aiPaddleYLocation + paddleHeight /2){
+			if (aiPaddleYLocation > 0){
+				aiPaddleYLocation -= paddleChange;
+				PongData.setAiPaddleYLocation(aiPaddleYLocation);
 			}
 		}
 	}
@@ -93,12 +135,11 @@ public class PongFrame extends JFrame {
 
 	private void playerPaddleCollision() {
 		if(ballIsInPlayerPaddleY() && ballIsInPlayerPaddleX()){
-			ballXSpeed*= -1;
+			ballXSpeed*= -1*(ballSpeedIncrease);
 		}
 	}
 
 	private boolean ballIsInPlayerPaddleX() {
-		int playerPaddleXLocation = PongData.getPlayerPaddleXLocation();
 		if (ballXLocation > playerPaddleXLocation && ballXLocation < playerPaddleXLocation + paddleWidth){
 			return true;
 		}
@@ -114,12 +155,11 @@ public class PongFrame extends JFrame {
 
 	private void aiPaddleCollision() {
 		if(ballIsInAiPaddleY() && ballIsInAiPaddleX()){
-			ballXSpeed*= -1;
+			ballXSpeed*= -1 * (ballSpeedIncrease);
 		}
 	}
 
 	private boolean ballIsInAiPaddleX() {
-		int aiPaddleXLocation = PongData.getAiPaddleXLocation();
 		if (ballXLocation > aiPaddleXLocation && ballXLocation < aiPaddleXLocation + paddleWidth){
 			return true;
 		}
@@ -163,7 +203,7 @@ public class PongFrame extends JFrame {
 			resetPaddles();
 		}
 		if (ballYLocation < 0||ballYLocation + ballYSpeed > frameHeight - frameHeightOffset){
-			ballYSpeed*= -1.1;
+			ballYSpeed*= -1*(ballSpeedIncrease);
 		}
 	}
 
@@ -181,50 +221,57 @@ public class PongFrame extends JFrame {
 	private void createPongPanel() {
 		//Create the game panel
 		PongDisplayPanel pongPanel = new PongDisplayPanel();
-		setSize(new Dimension(600, 600));
+		setSize(new Dimension(PongData.getFrameWidth(), PongData.getFrameHeight()));
 		pongPanel.setBackground(Color.BLACK);
 		add(pongPanel, BorderLayout.CENTER);
 		addKeyListener(new KeyAdapter(){//Add a listener for up/down/space keys
 			public void keyPressed(KeyEvent e){
-				int key = e.getKeyCode();
-				playerPaddleYLocation = PongData.getPlayerPaddleYLocation();
-				if (key == KeyEvent.VK_KP_DOWN || key == KeyEvent.VK_DOWN){
-					if (playerPaddleYLocation < frameHeight - paddleHeight - frameHeightOffset){//Frame offset counteracts the top bar width
-						playerPaddleYLocation+=paddleChange;
-						PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
-					}
-				}
-				if (key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP){
-					if (playerPaddleYLocation > 0){
-						playerPaddleYLocation -= paddleChange;
-						PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
-					}
-				}
-				if (key == KeyEvent.VK_SPACE || key == KeyEvent.VK_KP_UP){
-					if (pointScored && !gameWon){
-						Random rn = new Random();
-						ballXInitialSpeed = (int)(rn.nextInt()%2+4);
-						ballYInitialSpeed = (int)(rn.nextInt()%3+6);
-						if (Math.random() > 0.5){
-							ballXInitialSpeed*= -1;
-						}
-						if (Math.random() > 0.5){
-							ballYInitialSpeed*=-1;
-						}
-						PongData.setBallXSpeed(ballXInitialSpeed);
-						PongData.setBallYSpeed(ballYInitialSpeed);
-						pointScored = false;
-					}
-				}
-				repaint();
-			}
-			private void keyEvent(KeyEvent e) {
-				//sendKeyEvent(e);
+				keyHandling(e);
 			}
 			public void keyReleased(KeyEvent e){
-				keyEvent(e);
+				keyHandling(null);
+				keyDown = false;
+				keyUp = false;
 			}
-		});
+		}); 
+	}
+	
+	private void keyHandling(KeyEvent e){
+		if (e!=null){
+		int key = e.getKeyCode();
+		playerPaddleYLocation = PongData.getPlayerPaddleYLocation();
+		if (key == KeyEvent.VK_KP_DOWN || key == KeyEvent.VK_DOWN){
+			if (playerPaddleYLocation < frameHeight - paddleHeight - frameHeightOffset){
+				playerPaddleYLocation+=paddleChange;
+				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
+				keyDown = true;
+			}
+		}
+		if (key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP){
+			if (playerPaddleYLocation > 0){
+				playerPaddleYLocation -= paddleChange;
+				PongData.setPlayerPaddleYLocation(playerPaddleYLocation);
+				keyUp = true;
+			}
+		}
+		if (key == KeyEvent.VK_SPACE){
+			if (pointScored && !gameWon){
+				Random rn = new Random();
+				ballXInitialSpeed = (int)(rn.nextInt()%2+4);
+				ballYInitialSpeed = (int)(rn.nextInt()%3+6);
+				if (Math.random() > 0.5){
+					ballXInitialSpeed*= -1;
+				}
+				if (Math.random() > 0.5){
+					ballYInitialSpeed*=-1;
+				}
+				PongData.setBallXSpeed(ballXInitialSpeed);
+				PongData.setBallYSpeed(ballYInitialSpeed);
+				pointScored = false;
+			}
+		}
+		repaint();
+		}
 	}
 
 	private void createFrame() {
@@ -233,7 +280,9 @@ public class PongFrame extends JFrame {
 		setTitle("Pong - Graeme Cliffe");
 		gameWon = false;
 		pointScored = true;
-		requestFocus();
+		e = null;
+		keyDown = false;
+		keyUp = false;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 	}
