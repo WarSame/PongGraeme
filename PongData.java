@@ -1,77 +1,113 @@
 
 public class PongData {
-	private static int playerPaddleLocationX;
-	private static int playerPaddleLocationY;
-	private static int aiPaddleLocationX;
-	private static int aiPaddleLocationY;
-	private static int frameWidth;
-	private static int frameHeight;
-	private static int ballLocationX;
-	private static int ballLocationY;
 	private final static int defaultWidth = 600;
 	private final static int defaultHeight = 600;
+	private static int frameWidth = defaultWidth;
+	private static int frameHeight = defaultHeight;
+	private static final int paddleOffset = 5;
+	private static final int paddleHeight = frameHeight/10;
+	private static final int paddleWidth = frameWidth/20;
+	private static final int paddleYLocationInitial = frameHeight/2 - paddleHeight/2;
+	private static final int playerPaddleXLocation = paddleOffset;
+	private static int playerPaddleYLocation;
+	private static final int aiPaddleXLocation = frameWidth - paddleWidth - paddleOffset - 5;
+	private static int aiPaddleYLocation;
+	private static final int paddleChange = 5;
+	private static int ballYLocation;
+	private static int ballXLocation;
+	private static final int ballWidth = 5;
+	private static int ballXSpeed;
+	private static int ballYSpeed;
 	
-	
+	public static int getBallXSpeed() {
+		return ballXSpeed;
+	}
+
+	public static void setBallXSpeed(int ballXSpeed) {
+		PongData.ballXSpeed = ballXSpeed;
+	}
+
+	public static int getBallYSpeed() {
+		return ballYSpeed;
+	}
+
+	public static void setBallYSpeed(int ballYSpeed) {
+		PongData.ballYSpeed = ballYSpeed;
+	}
+
 	PongData(){
 		setFrameWidth(defaultWidth);
 		setFrameHeight(defaultHeight);
-		setBallLocationX(frameWidth/2);
-		setBallLocationY(frameHeight/2);
-		
+		setBallXLocation(frameWidth/2);
+		setBallYLocation(frameHeight/2);
+		setPlayerPaddleYLocation(paddleYLocationInitial);
+		setAiPaddleYLocation(paddleYLocationInitial);
 	}
 
-	public static int getBallLocationX() {
-		return ballLocationX;
+	public static int getPlayerPaddleYLocation() {
+		return playerPaddleYLocation;
 	}
 
-	public static void setBallLocationX(int ballLocationX) {
-		PongData.ballLocationX = ballLocationX;
+	public static void setPlayerPaddleYLocation(int playerPaddleYLocation) {
+		PongData.playerPaddleYLocation = playerPaddleYLocation;
 	}
 
-	public static int getBallLocationY() {
-		return ballLocationY;
+	public static int getAiPaddleYLocation() {
+		return aiPaddleYLocation;
 	}
 
-	public static void setBallLocationY(int ballLocationY) {
-		PongData.ballLocationY = ballLocationY;
+	public static void setAiPaddleYLocation(int aiPaddleYLocation) {
+		PongData.aiPaddleYLocation = aiPaddleYLocation;
 	}
 
-	public int getPlayerPaddleLocationX() {
-		return playerPaddleLocationX;
+	public static int getBallYLocation() {
+		return ballYLocation;
 	}
 
-	public void setPlayerPaddleLocationX(int playerPaddleLocationX) {
-		PongData.playerPaddleLocationX = playerPaddleLocationX;
+	public static void setBallYLocation(int ballYLocation) {
+		PongData.ballYLocation = ballYLocation;
 	}
 
-	public static int getPlayerPaddleLocationY() {
-		return playerPaddleLocationY;
+	public static void setBallXLocation(int ballXLocation) {
+		PongData.ballXLocation = ballXLocation;
 	}
 
-	public static void setPlayerPaddleLocationY(int playerPaddleLocationY) {
-		PongData.playerPaddleLocationY = playerPaddleLocationY;
+	public static int getPaddleOffset() {
+		return paddleOffset;
 	}
 
-	public int getAiPaddleLocationX() {
-		return aiPaddleLocationX;
+	public static int getPaddleHeight() {
+		return paddleHeight;
 	}
 
-	public void setAiPaddleLocationX(int aiPaddleLocationX) {
-		PongData.aiPaddleLocationX = aiPaddleLocationX;
+	public static int getPaddleWidth() {
+		return paddleWidth;
 	}
 
-	public int getAiPaddleLocationY() {
-		return aiPaddleLocationY;
+	public static int getPaddleYLocationInitial() {
+		return paddleYLocationInitial;
 	}
 
-	public static void setAiPaddleLocationY(int aiPaddleLocationY) {
-		PongData.aiPaddleLocationY = aiPaddleLocationY;
+	public static int getPlayerPaddleXLocation() {
+		return playerPaddleXLocation;
 	}
 
-	public static int getFrameWidth() {
-		return frameWidth;
+	public static int getAiPaddleXLocation() {
+		return aiPaddleXLocation;
 	}
-	
+
+	public static int getPaddleChange() {
+		return paddleChange;
+	}
+
+	public static int getBallWidth() {
+		return ballWidth;
+	}
+
+	public static int getBallXLocation() {
+		return ballXLocation;
+	}
+
 	public static int getDefaultWidth() {
 		return defaultWidth;
 	}
@@ -80,6 +116,10 @@ public class PongData {
 		return defaultHeight;
 	}
 
+	public static int getFrameWidth() {
+		return frameWidth;
+	}
+	
 	public static void setFrameWidth(int frameWidth) {
 		PongData.frameWidth = frameWidth;
 	}
