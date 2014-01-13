@@ -6,10 +6,12 @@ public class PongData {
 	private static int frameWidth = defaultWidth;
 	private static int frameHeight = defaultHeight;
 	private static final int paddleOffset = 5;
-	private static final int paddleHeight = frameHeight/10;
-	private static final int paddleWidth = frameWidth/20;
+	private static final int paddleHeight = frameHeight/7;
+	private static final int paddleWidth = frameWidth/40;
+	private static final int paddleChange = 7;
+	private static final int maxPoints = 5;
 	private static final int paddleYLocationInitial = frameHeight/2 - paddleHeight/2;
-	public static boolean gameWon;
+	private static boolean gameWon;
 
 	//Ball data
 	private static int ballYLocation;
@@ -31,14 +33,22 @@ public class PongData {
 	private static int aiWins;
 
 	PongData(){
-		setFrameWidth(defaultWidth);
-		setFrameHeight(defaultHeight);
 		setBallXLocation(frameWidth/2);
 		setBallYLocation(frameHeight/2);
 		setPlayerPaddleYLocation(paddleYLocationInitial);
 		setAiPaddleYLocation(paddleYLocationInitial);
 		setPlayerScore(0);
 		setAiScore(0);
+		setFrameWidth(defaultWidth);
+		setFrameHeight(defaultHeight);
+	}
+	
+	public static int getPaddleChange() {
+		return paddleChange;
+	}
+
+	public static int getMaxPoints() {
+		return maxPoints;
 	}
 
 	public static int getPlayerWins() {
