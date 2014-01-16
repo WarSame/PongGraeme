@@ -1,7 +1,6 @@
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.util.Random;
 import javax.swing.JFrame;
 public class PongData {
 	//Frame/game data
@@ -9,102 +8,107 @@ public class PongData {
 	private static int frameWidth = 750;
 	private static int frameHeight = 600;
 	private static JFrame frame;
-	private static final int paddleOffset = 5;
-	private static final int paddleHeight = frameHeight/7;
-	private static final int paddleWidth = frameWidth/40;
-	private static final int paddleChange = 7;
-	private static final int maxPoints = 3;
-	private static final int paddleYLocationInitial = frameHeight/2 - paddleHeight/2;
 	private static boolean gameWon;
 	private static KeyEvent e;
+	private static int maxPoints = 3;
 	//Ball data
 	private static final int updateTime = 16;//Use this to lower/raise the rate of refresh on the ball and AI. ms. Currently at 60fps
-	private static int ballYLocation;
-	private static int ballXLocation;
-	private static final int ballWidth = 5;
-	private static int ballXSpeed;
-	private static int ballYSpeed;
-	//private static final double ballSpeedIncrease = 1;
-	//Flat amount of how much the ball speeds up on collisions. Removed due to collision bugs.
+	private PongBall ball = new PongBall(this);
 	//Player data
-	private static final int playerPaddleXLocation = paddleOffset;
-	private static int playerPaddleYLocation;
+	private static int paddleHeight;
+	private static int paddleWidth;
+	private final int paddleOffset = 8;
+	private final int playerPaddleXLocation;
 	private static int playerScore;
 	private static boolean keyDown;
 	private static boolean keyUp;
+	private PongPaddle playerPaddle;
 	//Ai data
-	private static final int aiPaddleXLocation = frameWidth - paddleWidth - paddleOffset - 5;
-	private static int aiPaddleYLocation;
+	private final int aiPaddleXLocation;
 	private static int aiScore;
+	private PongPaddle aiPaddle;
+	
 	PongData(PongFrame pongFrame){
 		//Set your game data to default
-		ballXLocation = frameWidth/2;
-		ballYLocation = frameHeight/2;
-		playerPaddleYLocation = paddleYLocationInitial;
-		aiPaddleYLocation = paddleYLocationInitial;
+		paddleHeight = frameHeight/7;
+		paddleWidth = frameWidth/40;
+		playerPaddleXLocation = paddleOffset;
+		aiPaddleXLocation  = frameWidth - paddleWidth - paddleOffset;
+		playerPaddle = new PongPaddle(this, playerPaddleXLocation);
+		aiPaddle = new PongPaddle(this, aiPaddleXLocation);
 		playerScore = 0;
 		aiScore = 0;
 		gameWon = false;
 		pointScored = true;
-		e = null;
 		keyDown = false;
 		keyUp = false;
 		frame = pongFrame;
+		resetPaddles();
+		ball.reset();
 	}
-	public static boolean isGameWon() {
+	public PongBall getBall() {
+		return ball;
+	}
+	public static int getPaddleYLocationInitial() {
+		return PongPaddle.getYLocationInitial();
+	}
+	public boolean isGameWon() {
 		return gameWon;
 	}
-	public static int getPlayerScore() {
+	public int getPlayerScore() {
 		return playerScore;
 	}
-	public static int getAiScore() {
+	public int getAiScore() {
 		return aiScore;
 	}
-	public static int getPlayerPaddleYLocation() {
-		return playerPaddleYLocation;
+	public int getPlayerPaddleYLocation() {
+		return playerPaddle.getYLocation();
 	}
-	public static int getAiPaddleYLocation() {
-		return aiPaddleYLocation;
+	public int getAiPaddleYLocation() {
+		return aiPaddle.getYLocation();
 	}
-	public static int getBallYLocation() {
-		return ballYLocation;
+	public int getBallYLocation() {
+		return ball.getYLocation();
 	}
-	public static int getPaddleOffset() {
+	public int getPaddleOffset() {
 		return paddleOffset;
 	}
-	public static int getPaddleHeight() {
+	public int getPaddleHeight() {
 		return paddleHeight;
 	}
-	public static int getPaddleWidth() {
+	public int getPaddleWidth() {
 		return paddleWidth;
 	}
-	public static int getPlayerPaddleXLocation() {
-		return playerPaddleXLocation;
+	public int getPaddleChange(){
+		return PongPaddle.getPaddleChange();
 	}
-	public static int getAiPaddleXLocation() {
-		return aiPaddleXLocation;
+	public int getPlayerPaddleXLocation() {
+		return playerPaddle.getXLocation();
 	}
-	public static int getBallWidth() {
-		return ballWidth;
+	public int getAiPaddleXLocation() {
+		return aiPaddle.getXLocation();
 	}
-	public static int getBallXLocation() {
-		return ballXLocation;
+	public int getBallWidth() {
+		return ball.getBallWidth();
 	}
-	public static int getFrameWidth() {
+	public int getBallXLocation() {
+		return ball.getXLocation();
+	}
+	public int getFrameWidth() {
 		return frameWidth;
 	}
-	public static int getFrameHeight() {
+	public int getFrameHeight() {
 		return frameHeight;
 	}	
 	public void runGame() {//Heartbeat cycle. Updates all the data and does logic. Sleep is to slow down the game.
 		while(!gameWon){
 			keyHandling(e);
 			edgeCollision();
-			playerPaddleCollision();
-			aiPaddleCollision();
+			playerPaddle.collision();
+			aiPaddle.collision();
 			playerMove();
 			aiMove();
-			updateBall();
+			ball.update();
 			frame.repaint();
 			try {
 				Thread.sleep(updateTime);
@@ -113,98 +117,51 @@ public class PongData {
 			}
 		}
 	}
-	
-	private static void playerMove() {//When user hits arrows, move their paddle
+	private void playerMove() {//When user hits arrows, move their paddle
 		if (keyDown){//Move paddle down when down key is hit and won't go off the board
-			if (playerPaddleYLocation < frameHeight - paddleHeight){
-				playerPaddleYLocation += paddleChange;
+			if (playerPaddle.getYLocation() < frameHeight - PongPaddle.getPaddleHeight()){
+				playerPaddle.moveDown();
 			}
 		}
 		if (keyUp){//Vice versa
-			if (playerPaddleYLocation > 0){
-				playerPaddleYLocation -= paddleChange;
+			if (playerPaddle.getYLocation() > 0){
+				playerPaddle.moveUp();
 			}
 		}
 	}
-	private static void aiMove() {//AI tracks the ball except when it hits the edges
-		if (ballYLocation > aiPaddleYLocation + paddleHeight/2){//Move down when ball is below you
-			if (aiPaddleYLocation + paddleHeight < frameHeight){
-				aiPaddleYLocation += paddleChange;
+	private void aiMove() {//AI tracks the ball except when it hits the edges
+		if (ball.getYLocation() > aiPaddle.getYLocation() + PongPaddle.getPaddleHeight()/2){//Move down when ball is below you
+			if (aiPaddle.getYLocation() + PongPaddle.getPaddleHeight() < frameHeight){
+				aiPaddle.moveDown();
 			}
 		}
-		if (ballYLocation < aiPaddleYLocation + paddleHeight /2){//Opposite
-			if (aiPaddleYLocation > 0){
-				aiPaddleYLocation -= paddleChange;
+		if (ball.getYLocation() < aiPaddle.getYLocation() + PongPaddle.getPaddleHeight() /2){//Opposite
+			if (aiPaddle.getYLocation() > 0){
+				aiPaddle.moveUp();
 			}
 		}
 	}
-	private static void updateBall() {//Change the data for the ball
-		ballXLocation += ballXSpeed;
-		ballYLocation += ballYSpeed;
+	private void resetPaddles() {//On point or new game, put the paddles in their initial spot
+		playerPaddle.reset();
+		aiPaddle.reset();
 	}
-	private static void playerPaddleCollision() {//Determines if ball is colliding with player, if so makes it bounce
-		if(ballIsInPlayerPaddleY() && ballIsInPlayerPaddleX()){
-			ballXSpeed = (int) (-1*(ballXSpeed));
-		}
-	}
-	private static boolean ballIsInPlayerPaddleX() {//Determines if the ball is within the X range of the paddle
-		if (ballXLocation > playerPaddleXLocation && ballXLocation < playerPaddleXLocation + paddleWidth){
-			return true;
-		}
-		return false;
-	}
-	private static boolean ballIsInPlayerPaddleY() {//" Y range "
-		if (ballYLocation > playerPaddleYLocation && ballYLocation < playerPaddleYLocation + paddleHeight){
-			return true;
-		}
-		return false;
-	}
-	private static void aiPaddleCollision() {//Determines if the ball is colliding with the AI, if so makes it bounce
-		if(ballIsInAiPaddleY() && ballIsInAiPaddleX()){
-			ballXSpeed = (int) (-1 * (ballXSpeed));
-		}
-	}
-	private static boolean ballIsInAiPaddleX() {//Determines if the ball is within the X range of the paddle
-		if (ballXLocation > aiPaddleXLocation && ballXLocation < aiPaddleXLocation + paddleWidth){
-			return true;
-		}
-		return false;
-	}
-	private static boolean ballIsInAiPaddleY() {// " Y range "
-		if (ballYLocation > aiPaddleYLocation && ballYLocation < aiPaddleYLocation + paddleHeight){
-			return true;
-		}
-		return false;
-	}
-	private static void resetBall() {//On point or new game, put the ball in the middle
-		ballXLocation = frameWidth/2;
-		ballYLocation = frameHeight/2;
-	}
-	private static void resetPaddles() {//On point or new game, put the paddles in their initial spot
-		playerPaddleYLocation = paddleYLocationInitial;
-		aiPaddleYLocation = paddleYLocationInitial;
-	}
-	private static void edgeCollision() {//Determine if the ball is colliding with the edges
-		if (ballXLocation - ballXSpeed < 0){//When it collides with the left side give a point to the AI
+	private void edgeCollision() {//Determine if the ball is colliding with the edges
+		if (ball.getXLocation() - ball.getXSpeed() < 0){//When it collides with the left side give a point to the AI
 			aiScore++;
-			ballXSpeed = 0;
-			ballYSpeed = 0;
 			pointScored = true;
 			checkVictory();
-			resetBall();
+			ball.reset();
 			resetPaddles();
 		} 
-		if (ballXLocation + ballXSpeed > frameWidth){//When it collides with the right side give a point to the player
+		if (ball.getXLocation() + ball.getXSpeed() > frameWidth){//When it collides with the right side give a point to the player
 			playerScore++;
-			ballXSpeed = 0;
-			ballYSpeed = 0;
 			pointScored = true;
 			checkVictory();
-			resetBall();
+			ball.reset();
 			resetPaddles();
 		}
-		if (ballYLocation < 0||ballYLocation + ballYSpeed > frameHeight){//When it collides with the top or bottom make it bounce
-			ballYSpeed = (int) (-1*(ballYSpeed));
+		if (ball.getYLocation() < 0||ball.getYLocation() + ball.getYSpeed() > frameHeight){//When it collides with the top or bottom make it bounce
+			ball.reverseY();
 		}
 	}
 	private static void checkVictory() {//If one player has earned enough points end the game and display the victory
@@ -215,48 +172,52 @@ public class PongData {
 			gameWon = true;
 		}
 	}
-	public static void keyHandling(KeyEvent e){//Handles user pressing key
+	public void keyHandling(KeyEvent e){//Handles user pressing key
 		if (e!=null){//e will be null upon key release, when we want to stop cycling the input
 		int key = e.getKeyCode();
-		
+
 		if (key == KeyEvent.VK_KP_DOWN || key == KeyEvent.VK_DOWN){
-			//On down key start moving the paddle down
-			if (playerPaddleYLocation < frameHeight - paddleHeight){
-				playerPaddleYLocation+=paddleChange;
-				keyDown = true;
-			}
+			keyDown(key);
 		}
 		if (key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP){
-			//On up key start moving the paddle up
-			if (playerPaddleYLocation > 0){
-				playerPaddleYLocation -= paddleChange;
-				keyUp = true;
-			}
+			keyUp(key);
 		}
 		if (key == KeyEvent.VK_SPACE){
-			//On a space key launch the ball semi-randomly
-			if (pointScored && !gameWon){
-				Random rn = new Random();
-				ballXSpeed = (int)(rn.nextInt()%2+6);
-				ballYSpeed = (int)(rn.nextInt()%2+8);
-				if (Math.random() > 0.5){
-					ballXSpeed*= -1;
-				}
-				if (Math.random() > 0.5){
-					ballYSpeed*=-1;
-				}
-				pointScored = false;
-			}
+			keySpace(key);
 		}
 		if (key == KeyEvent.VK_ESCAPE){
-			//On escape close the window
-			WindowEvent wev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
-			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
+			keyEscape(key);
 		}
 		frame.repaint();
 		}
 	}
-	public static void keyReleased(KeyEvent e2) {//Handles user releasing key
+	private void keyEscape(int key) {
+		//On escape close the window
+		WindowEvent wev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
+		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
+	}
+	private void keySpace(int key) {
+		//On a space key launch the ball semi-randomly
+		if (pointScored && !gameWon){
+			ball.launch();
+			pointScored = false;
+		}
+	}
+	private void keyDown(int key) {
+		//On down key start moving the paddle down
+		if (playerPaddle.getYLocation() < frameHeight - PongPaddle.getPaddleHeight()){
+			playerPaddle.moveDown();
+			keyDown = true;
+		}
+	}
+	private void keyUp(int key) {
+		//On up key start moving the paddle up
+		if (playerPaddle.getYLocation() > 0){
+			playerPaddle.moveUp();
+			keyUp = true;
+		}
+	}
+	public void keyReleased(KeyEvent e2) {//Handles user releasing key
 		int key2 = e2.getKeyCode();
 		if (key2 == KeyEvent.VK_KP_DOWN || key2 == KeyEvent.VK_DOWN){//If they release the down key stop moving the paddle down
 			keyDown = false;
